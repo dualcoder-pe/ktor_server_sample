@@ -1,0 +1,14 @@
+ktor:
+  deployment:
+    port: 8080
+    watch:
+      - classes
+  application:
+    modules:
+      - com.dualcoder.ApplicationKt.module
+
+jwt:
+  secret: "secrets"
+  audience: "com.dualcoder.ktor_server_sample"
+  realm: "ktor_server_sample"
+  domain: "ktor_server_sample.dualcoder.com"

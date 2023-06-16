@@ -1,0 +1,243 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Api
+  license:
+    name: Apache License
+  contact:
+    name: Taekyu Lim
+    email: admin@dualcoder.pe.kr
+servers:
+  - url: https://localhost:8080/api/
+paths:
+  /api/auth/register:
+    post:
+      summary: Sign up user
+      operationId: register
+      tags:
+        - Auth
+      requestBody:
+        description: Request body for Register
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+      responses:
+        '201':
+          description: created user successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserVO'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyApiError'
+        '409':
+          description: user exists already
+
+  /api/auth/login:
+    post:
+      summary: Sign in user
+      operationId: login
+      tags:
+        - Auth
+      requestBody:
+        description: Request body for Login
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+      responses:
+        '200':
+          description: signed in successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserVO'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptyApiError'
+
+  /api/auth/logout:
+    post:
+      summary: leave users
+      operationId: logout
+      tags:
+        - Auth
+      responses:
+        '204':
+          description: logout successfully
+
+  /api/posts:
+    get:
+      summary: get list of posts
+      operationId: list
+      tags:
+        - Posts
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            description: number for paging
+        - in: query
+          name: username
+          schema:
+            type: string
+            description: filter by username
+        - in: query
+          name: tag
+          schema:
+            type: string
+            description: filter by tag
+
+      responses:
+        '200':
+          description: get posts successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PostVO"
+        '400':
+          description: page is lower than 0
+
+    post:
+      summary: write post
+      operationId: write
+      tags:
+        - Posts
+      requestBody:
+        description: Write post
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostDto'
+      responses:
+        '200':
+          description: Write post successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostVO"
+        '400':
+          description: title or body is blank
+        '401':
+          description: need to login
+        '417':
+          description: failed to write to DB
+
+  /api/posts/{id}:
+    get:
+      summary: get post
+      operationId: read
+      tags:
+        - Post
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            description: Get post by id
+      responses:
+        '200':
+          description: Get post successfully
+
+    delete:
+      summary: remove post
+      operationId: remove
+      tags:
+        - Post
+      responses:
+        '204':
+          description: Remove selected post
+
+    patch:
+      summary: update post
+      operationId: update
+      tags:
+        - Post
+      requestBody:
+        description: Update post
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostDto'
+      responses:
+        '200':
+          description: Update post successfully
+        '400':
+          description: Title or body is empty
+        '417':
+          description: Failed to update
+
+components:
+  schemas:
+    UserDto:
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    UserVO:
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+
+    Tags:
+      type: array
+      items:
+        type: string
+        example: [ "tag1", "tag2", "tag3" ]
+
+    PostDto:
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        tags:
+          $ref: "#/components/schemas/Tags"
+
+    PostVO:
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+        publishedDate:
+          type: number
+        user:
+          $ref: "#/components/schemas/UserVO"
+
+    PostsDto:
+      properties:
+        username:
+          type: string
+        tags:
+          $ref: "#/components/schemas/Tags"
+
+    EmptyApiError:
+      properties:
+        msg:
+          type: string
